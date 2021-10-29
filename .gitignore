@@ -1,2 +1,5 @@
 /target
 .idea
+/source
+/dest
+._target
