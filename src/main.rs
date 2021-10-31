@@ -1,6 +1,6 @@
 use std::io;
 use std::fs;
-use std::path::Path;
+use std::path::{self, Path, PathBuf};
 
 fn main() {
     //Take inputs and store in Vector separated by spaces
@@ -8,6 +8,9 @@ fn main() {
     println!("Drag and Drop destination folders (Separate each directory by space)");
     io::stdin().read_line(&mut destFolders).expect("Failed to read line");
     let destFolders: Vec<&str> = destFolders.trim().split_whitespace().collect(); 
+    // Split destFolers into Vec<&str> separated by " /" and trim
+    // let destFolders: Vec<&str> = destFolders.trim().split(" /").collect();
+
     // Bug where it unintentially cuts strings where there is a space in folder name
 
     // let n = destFolders[0];
@@ -46,16 +49,33 @@ fn main() {
     // Receive files and folders to move from user
     let mut sourceFiles = String::new();
 
-    let result = loop {
+    let source = loop {
         let mut option = String::new();
         println!("Is your file/foler all located in the same directory? (y/n)");
         io::stdin().read_line(&mut option).expect("Failed to read line");
-        let inputResult = sourceFileInput(&mut option);
+        let mut inputResult = sourceFileInput(&mut option);
         if inputResult != "" {
             break inputResult;
         }
     };
+    // Split souce by regex that matches spaces that does come after forward slash
+    let mut source: Vec<&str> = source.trim().split_whitespace().collect(); 
+    // println!("{:?}", source[0]);
+    let mut sourceContents: Vec<PathBuf> = vec![];
+    if source.len() > 1 { // If there are multiple files/folders
+        for i in 0..source.len() {
+            sourceContents.push(Path::new(source[i]).to_path_buf());
+        }
+    } else if source.len() == 1 { // If there is only one folder, read folder contents
+        println!("{:?}", source[0]);
+        let sourceFolderContents = fs::read_dir(source[0]).expect("Failed to read directory");
+        for file in sourceFolderContents {
+            sourceContents.push(file.unwrap().path());
+        }
+    }
+    println!("{:?}", sourceContents);
 
+    // Split by absolute paths using /  as splitter
     // println!("Drag and Drop files and folders to move (Separate each file or folder by space)");
 }
 
@@ -69,7 +89,7 @@ fn sourceFileInput(option: &mut String) -> String{
             io::stdin().read_line(&mut sourceDir).expect("Failed to read line");
         },
         "n" => {
-            println!("Enter the directory of the files/folders to move");
+            println!("Enter files/folders to move (Separate by spaces)");
             io::stdin().read_line(&mut sourceDir).expect("Failed to read line");
         },
         _ => {
