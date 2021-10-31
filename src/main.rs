@@ -9,10 +9,13 @@ fn main() {
     let mut destFolders = String::new();
     println!("Drag and Drop destination folders (Separate each directory by space)");
     io::stdin().read_line(&mut destFolders).expect("Failed to read line");
+
+    // Put this in function later
     let destFolders = destFolders.replace("\\ ", " ");
     let destFolders = destFolders.replace("\\", "");
     let destFolders = destFolders.replace(" /", " //");
     let destFolders: Vec<&str> = destFolders.trim().split(" /").collect(); 
+    //
     
 
     // Bug where it unintentially cuts strings where there is a space in folder name
@@ -62,8 +65,14 @@ fn main() {
             break inputResult;
         }
     };
-    // Split souce by regex that matches spaces that does come after forward slash
-    let mut source: Vec<&str> = source.trim().split_whitespace().collect(); 
+
+    // Put this in function later
+    let source = source.replace("\\ ", " ");
+    let source = source.replace("\\", "");
+    let source = source.replace(" /", " //");
+    let mut source: Vec<&str> = source.trim().split(" /").collect(); 
+    //
+
     // println!("{:?}", source[0]);
     let mut sourceContents: Vec<PathBuf> = vec![];
     if source.len() > 1 { // If there are multiple files/folders
