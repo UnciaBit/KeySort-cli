@@ -3,13 +3,17 @@ use std::fs;
 use std::path::{self, Path, PathBuf};
 
 fn main() {
+
+
     //Take inputs and store in Vector separated by spaces
     let mut destFolders = String::new();
     println!("Drag and Drop destination folders (Separate each directory by space)");
     io::stdin().read_line(&mut destFolders).expect("Failed to read line");
-    let destFolders: Vec<&str> = destFolders.trim().split_whitespace().collect(); 
-    // Split destFolers into Vec<&str> separated by " /" and trim
-    // let destFolders: Vec<&str> = destFolders.trim().split(" /").collect();
+    let destFolders = destFolders.replace("\\ ", " ");
+    let destFolders = destFolders.replace("\\", "");
+    let destFolders = destFolders.replace(" /", " //");
+    let destFolders: Vec<&str> = destFolders.trim().split(" /").collect(); 
+    
 
     // Bug where it unintentially cuts strings where there is a space in folder name
 
@@ -75,8 +79,8 @@ fn main() {
     }
     println!("{:?}", sourceContents);
 
-    // Split by absolute paths using /  as splitter
-    // println!("Drag and Drop files and folders to move (Separate each file or folder by space)");
+
+
 }
 
 // Function returns a string
