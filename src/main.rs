@@ -88,6 +88,30 @@ fn main() {
     }
     println!("{:?}", sourceContents);
 
+    // Loop through sourceContents and move to destDirs
+    for i in 0..sourceContents.len() {
+        match sourceContents[i].is_dir(){
+            true => {
+                loop{
+                    let mut option = String::new();
+                    println!("Move \n {} \n to", sourceContents[i].display());
+                    io::stdin().read_line(&mut option).expect("Failed to read line");
+                    let mut result = moveFile(&sourceContents[i], &option, &destDirs);
+                    println!("{:?}", result);
+                    if result == true {
+                        break;
+                    } else{
+                        println!("Folder assosiated with {} was not found", option)
+                    }
+                }
+            }
+            false => {
+                println!("Move {} to: ", sourceContents[i].file_name().unwrap().to_str().unwrap());
+            }
+        }
+        // println!("{}", sourceContents[i].display());
+    }
+
 
 
 }
@@ -111,4 +135,26 @@ fn sourceFileInput(option: &mut String) -> String{
     }
     println!("Source Dir (In Function): {}", sourceDir);
     return sourceDir.trim().to_string();
+}
+
+fn moveFile(source: &PathBuf, dest: &str, destDirs: &Vec<Vec<String>>) -> bool{
+    let source = source.to_path_buf();
+    let mut iter = destDirs.iter();
+    let dest = dest.trim();
+    println!("moveFile Function source: {:?}", source);
+    println!("moveFile Function dest: {:?}", dest);
+    // Find dest from 2d vector destDirs
+    // Create new boolean varaible to store result of match
+    let mut found = false;
+
+    for i in 0..destDirs.len() {
+        if destDirs[i][1].to_string() == dest{
+            println!("Equal: destDir: {}, dest: {}", destDirs[i][1], dest);
+            found = true;
+            break;
+        }
+    }
+    println!("Found: {}", &found);
+    return found;
+    // fs::rename(source, dest).expect("Failed to move file");
 }
