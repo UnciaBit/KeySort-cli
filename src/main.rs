@@ -9,6 +9,7 @@ use std::{thread, time};
 use std::sync::mpsc::{self, TryRecvError};
 use crossterm::{QueueableCommand, cursor};
 use std::{io::{stdout, Write}};
+use fs_extra::file::*;
 
 fn main() {
 
@@ -104,7 +105,7 @@ fn main() {
                     let mut option = String::new();
                     println!("Move \n {} \n to", sourceContents[i].display());
                     io::stdin().read_line(&mut option).expect("Failed to read line");
-                    let mut result = moveFile(&sourceContents[i], &option, &destDirs);
+                    let mut result = moveContent(&sourceContents[i], &option, &destDirs, true);
                     println!("{:?}", result);
                     if result == true {
                         break;
@@ -114,7 +115,18 @@ fn main() {
                 }
             }
             false => {
-                println!("Move {} to: ", sourceContents[i].file_name().unwrap().to_str().unwrap());
+                loop{
+                    let mut option = String::new();
+                    println!("Move {} to: ", sourceContents[i].file_name().unwrap().to_str().unwrap());
+                    io::stdin().read_line(&mut option).expect("Failed to read line");
+                    let mut result = moveContent(&sourceContents[i], &option, &destDirs, false);
+                    println!("{:?}", result);
+                    if result == true {
+                        break;
+                    } else{
+                        println!("Folder assosiated with {} was not found", option)
+                    }
+                }
             }
         }
         // println!("{}", sourceContents[i].display());
@@ -145,17 +157,21 @@ fn sourceFileInput(option: &mut String) -> String{
     return sourceDir.trim().to_string();
 }
 
-fn moveFile(source: &PathBuf, dest: &str, destDirs: &Vec<Vec<String>>) -> bool{
+
+fn moveContent(source: &PathBuf, dest: &str, destDirs: &Vec<Vec<String>>, mode: bool) -> bool{ // mode: true = folder, false = file
     let source = source.to_path_buf();
     let mut iter = destDirs.iter();
     let dest = dest.trim();
-    println!("moveFile Function source: {:?}", source);
-    println!("moveFile Function dest: {:?}", dest);
-    // Find dest from 2d vector destDirs
-    // Create new boolean varaible to store result of match
     let mut found = false;
     let mut destPath = PathBuf::new();
-
+    let mut stdout = stdout();
+    let copyOptionsDir = fs_extra::dir::CopyOptions::new();
+    let copyOptionsFile = fs_extra::file::CopyOptions::new();
+    println!("moveContent Function source: {:?}", source);
+    println!("moveContent Function dest: {:?}", dest);
+    // Find dest from 2d vector destDirs
+    // Create new boolean varaible to store result of match
+    
     for i in 0..destDirs.len() {
         if destDirs[i][1].to_string() == dest{
             println!("Equal: destDir: {}, dest: {}", destDirs[i][1], dest);
@@ -164,23 +180,42 @@ fn moveFile(source: &PathBuf, dest: &str, destDirs: &Vec<Vec<String>>) -> bool{
             break;
         }
     }
-    
 
-    println!("Found: {}", &found);
-    let mut stdout = stdout();
-    let copyOptions = CopyOptions::new();
+    println!("Found: {}", &found);    
 
-    let handle = |process_info: TransitProcess| {
-        stdout.queue(cursor::SavePosition);
-        stdout.write(format!("{} Bytes of {} Moved", process_info.copied_bytes, process_info.total_bytes).as_bytes());
-        stdout.queue(cursor::RestorePosition);
-        stdout.flush();
-        fs_extra::dir::TransitProcessResult::ContinueOrAbort
-    };
 
     if found == true {
-        println!("Move Confirmation\n File/Folder to move: {}\n Destination: {}", source.display(), destPath.display());
-        move_dir_with_progress(source, destPath, &copyOptions, handle).expect("Failed to move file");
+        match mode {
+            true => {// If folder
+                let handleDir = |process_info: fs_extra::dir::TransitProcess| {
+                    stdout.queue(cursor::SavePosition).unwrap();
+                    stdout.write(format!("{} Bytes of {} Moved", process_info.copied_bytes, process_info.total_bytes).as_bytes()).unwrap();
+                    stdout.queue(cursor::RestorePosition).unwrap();
+                    stdout.flush().unwrap();
+                    fs_extra::dir::TransitProcessResult::ContinueOrAbort
+                };
+                println!("Move Confirmation\n File/Folder to move: {}\n Destination: {}", source.display(), destPath.display());
+                move_dir_with_progress(source, destPath, &copyOptionsDir, handleDir).expect("Failed to move file");
+            },
+            false => {// If file
+                let handleFile = |process_info: fs_extra::file::TransitProcess| {
+                    stdout.queue(cursor::SavePosition).unwrap();
+                    stdout.write(format!("{} Bytes of {} Moved", process_info.copied_bytes, &process_info.total_bytes).as_bytes()).unwrap();
+                    stdout.queue(cursor::RestorePosition).unwrap();
+                    stdout.flush().unwrap();
+                };
+                println!("Move Confirmation\n File/Folder to move: {}\n Destination: {}", source.display(), destPath.display());
+                // If the character at the end of destPath is not /, add it
+                if destPath.to_str().unwrap().chars().last().unwrap() != '/' {
+                    destPath.join("/");
+                }
+                // Add souce filename at the end of destPath
+                let mut destPath = destPath.join(source.file_name().unwrap());
+                println!("{:?}", destPath);
+                move_file_with_progress(source, destPath, &copyOptionsFile, handleFile).expect("Failed to move file");
+            },
+        }
+        
     }
 
     return found;
