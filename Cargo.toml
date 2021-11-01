@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 fs_extra = "1.2.0"
+crossterm = "0.22.1"

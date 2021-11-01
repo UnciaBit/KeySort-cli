@@ -2,6 +2,14 @@ use std::io;
 use std::fs;
 use std::path::{self, Path, PathBuf};
 
+extern crate fs_extra;
+use fs_extra::dir::*;
+use fs_extra::error::*;
+use std::{thread, time};
+use std::sync::mpsc::{self, TryRecvError};
+use crossterm::{QueueableCommand, cursor};
+use std::{io::{stdout, Write}};
+
 fn main() {
 
 
@@ -146,15 +154,35 @@ fn moveFile(source: &PathBuf, dest: &str, destDirs: &Vec<Vec<String>>) -> bool{
     // Find dest from 2d vector destDirs
     // Create new boolean varaible to store result of match
     let mut found = false;
+    let mut destPath = PathBuf::new();
 
     for i in 0..destDirs.len() {
         if destDirs[i][1].to_string() == dest{
             println!("Equal: destDir: {}, dest: {}", destDirs[i][1], dest);
             found = true;
+            destPath = Path::new(&destDirs[i][0]).to_path_buf();
             break;
         }
     }
+    
+
     println!("Found: {}", &found);
+    let mut stdout = stdout();
+    let copyOptions = CopyOptions::new();
+
+    let handle = |process_info: TransitProcess| {
+        stdout.queue(cursor::SavePosition);
+        stdout.write(format!("{} Bytes of {} Moved", process_info.copied_bytes, process_info.total_bytes).as_bytes());
+        stdout.queue(cursor::RestorePosition);
+        stdout.flush();
+        fs_extra::dir::TransitProcessResult::ContinueOrAbort
+    };
+
+    if found == true {
+        println!("Move Confirmation\n File/Folder to move: {}\n Destination: {}", source.display(), destPath.display());
+        move_dir_with_progress(source, destPath, &copyOptions, handle).expect("Failed to move file");
+    }
+
     return found;
     // fs::rename(source, dest).expect("Failed to move file");
 }
