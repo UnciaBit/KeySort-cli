@@ -65,11 +65,13 @@ fn main() {
     // Receive files and folders to move from user
     let mut sourceFiles = String::new();
 
+    let mut sourceOption = true;
+
     let source = loop {
         let mut option = String::new();
         println!("Is your file/foler all located in the same directory? (y/n)");
         io::stdin().read_line(&mut option).expect("Failed to read line");
-        let mut inputResult = sourceFileInput(&mut option);
+        let (inputResult, sourceOption) = sourceFileInput(&mut option);
         if inputResult != "" {
             break inputResult;
         }
@@ -84,11 +86,11 @@ fn main() {
 
     // println!("{:?}", source[0]);
     let mut sourceContents: Vec<PathBuf> = vec![];
-    if source.len() > 1 { // If there are multiple files/folders
+    if source.len() >= 1{ // If there are multiple files/folders
         for i in 0..source.len() {
             sourceContents.push(Path::new(source[i]).to_path_buf());
         }
-    } else if source.len() == 1 { // If there is only one folder, read folder contents
+    } else if source.len() == 1 && sourceOption ==  true{ // If there is only one folder, read folder contents
         println!("{:?}", source[0]);
         let sourceFolderContents = fs::read_dir(source[0]).expect("Failed to read directory");
         for file in sourceFolderContents {
@@ -137,24 +139,27 @@ fn main() {
 }
 
 // Function returns a string
-fn sourceFileInput(option: &mut String) -> String{
+fn sourceFileInput(option: &mut String) -> (String, bool){
     let mut sourceDir = String::new();
+    let mut sourceOption = true;
     println!("{}", option);
     match option.trim() {
         "y" => {
             println!("Enter the directory where all files/folders are stored");
             io::stdin().read_line(&mut sourceDir).expect("Failed to read line");
+            sourceOption = true;
         },
         "n" => {
             println!("Enter files/folders to move (Separate by spaces)");
             io::stdin().read_line(&mut sourceDir).expect("Failed to read line");
+            sourceOption = false;
         },
         _ => {
             println!("Invalid input, try again");
         }
     }
     println!("Source Dir (In Function): {}", sourceDir);
-    return sourceDir.trim().to_string();
+    return (sourceDir.trim().to_string(),sourceOption);
 }
 
 
