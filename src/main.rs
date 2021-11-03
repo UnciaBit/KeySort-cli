@@ -64,7 +64,7 @@ fn main() {
     };
 
     // println!("Result Tuple 0 {}", &resultTuple.0);
-    println!("Result Tuple 1 {}", &resultTuple.1);
+    // println!("Result Tuple 1 {}", &resultTuple.1);
 
     // Put this in function later
     let source: Vec<String> = dirListFormat(&source);
