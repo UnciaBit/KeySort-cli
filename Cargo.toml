@@ -1,6 +1,6 @@
 [package]
 name = "keysort"
-version = "0.1.0-alpha.2"
+version = "0.1.0-alpha.2B"
 edition = "2018"
 authors = ["Wren Hainsworth <hainsworthwren@gmail.com>"]
 license = "MIT OR Apache-2.0"
