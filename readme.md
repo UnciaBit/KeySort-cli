@@ -2,6 +2,10 @@
 
 ## Todo
 - Add support for Windows and Linux drag and drop syntax
+- Console decoration
+    - https://docs.rs/dialoguer/0.9.0/dialoguer/
+    - https://docs.rs/indicatif/0.16.2/indicatif/
+    - https://docs.rs/console/0.15.0/console/
 
 **Features:**
 - Recursive mode
