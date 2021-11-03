@@ -1,6 +1,6 @@
 [package]
 name = "keysort"
-version = "0.1.0-alpha"
+version = "0.1.0-alpha.2"
 edition = "2018"
 authors = ["Wren Hainsworth <hainsworthwren@gmail.com>"]
 license = "MIT OR Apache-2.0"
@@ -8,7 +8,7 @@ description = "Sort files/folders into character assigned directories"
 readme = "readme.md"
 homepage = "https://github.com/UnciaBit/KeySort-cli"
 repository = "https://github.com/UnciaBit/KeySort-cli"
-keywords = ["cli", "alpha", "demo","filesystem","sort"]
+keywords = ["cli", "alpha","filesystem","sort","utility"]
 categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
