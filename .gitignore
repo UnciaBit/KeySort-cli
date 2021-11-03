@@ -1,2 +1,7 @@
 /target
 .idea
+/source
+/dest
+._target
+/samples
+.DS_Store
