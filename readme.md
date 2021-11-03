@@ -1,7 +1,9 @@
 # KeySort-cli
 
 ## Todo
- **Features:**
+- Add support for Windows and Linux drag and drop syntax
+
+**Features:**
 - Recursive mode
     - https://rust-lang-nursery.github.io/rust-cookbook/file/dir.html
 
