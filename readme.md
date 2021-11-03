@@ -3,7 +3,7 @@
 keysort is a small utility to sort files and folders into different folders by assigning a key/character to folders, then
 pressing the assigned keys for each files and folders
 
-> **As of version 0.1.0-alpha-2, this application only works with macOS unless the 
+> **As of version 0.1.0-alpha.2, this application only works with macOS unless the 
 terminal input is correctly formatted**
 
 ## Installation
