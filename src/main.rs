@@ -12,24 +12,17 @@ use std::{io::{stdout, Write}};
 use fs_extra::file::*;
 
 fn main() {
-
-
     //Take inputs and store in Vector separated by spaces
     let mut destFolders = String::new();
     println!("Drag and Drop destination folders (Separate each directory by space)");
     io::stdin().read_line(&mut destFolders).expect("Failed to read line");
 
-    // Put this in function later
-    let destFolders = destFolders.replace("\\ ", " ");
-    let destFolders = destFolders.replace("\\", "");
-    let destFolders = destFolders.replace(" /", " //");
-    let destFolders: Vec<&str> = destFolders.trim().split(" /").collect(); 
-    //
+    let destFolders: Vec<String> = dirListFormat(&destFolders);
 
     let mut destDirs: Vec<Vec<String>> = Vec::new(); // 2d Vector of destination directories
 
     for i in 0..destFolders.len() {
-        let destFolder = Path::new(destFolders[i]);
+        let destFolder = Path::new(&destFolders[i]);
         if destFolder.exists() && destFolder.is_dir(){ // Check if destination folder exists and is a directory
             
             // println!("{} exists and is a directory", destFolders[i]);
@@ -74,21 +67,18 @@ fn main() {
     println!("Result Tuple 1 {}", &resultTuple.1);
 
     // Put this in function later
-    let source = source.replace("\\ ", " ");
-    let source = source.replace("\\", "");
-    let source = source.replace(" /", " //");
-    let mut source: Vec<&str> = source.trim().split(" /").collect(); 
+    let source: Vec<String> = dirListFormat(&source);
     //
 
     let mut sourceContents: Vec<PathBuf> = vec![];
     if source.len() > 1 || resultTuple.1 == false{ // If there are multiple files/folders
         for i in 0..source.len() {
-            sourceContents.push(Path::new(source[i]).to_path_buf());
+            sourceContents.push(Path::new(&source[i]).to_path_buf());
         }
     } else if source.len() == 1 && resultTuple.1 == true{ 
         // If there is only one folder and "All file/folders located in same directory" is true
         // println!("{:?}", source[0])
-        let sourceFolderContents = fs::read_dir(source[0]).expect("Failed to read directory");
+        let sourceFolderContents = fs::read_dir(&source[0]).expect("Failed to read directory");
         for file in sourceFolderContents {
             sourceContents.push(file.unwrap().path());
         }
@@ -227,4 +217,13 @@ fn moveContent(source: &PathBuf, dest: &str, destDirs: &Vec<Vec<String>>, mode: 
         
     }
     return destFound;
+}
+
+fn dirListFormat(dir: &str) -> Vec<String>{
+    let dirList = dir.to_string();
+    let dirList = dirList.replace("\\ ", " ");
+    let dirList = dirList.replace("\\", "");
+    let dirList = dirList.replace(" /", " //");
+    let dirList: Vec<String> = dirList.trim().split(" /").map(|x| x.to_string()).collect(); 
+    return dirList;
 }
