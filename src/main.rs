@@ -26,7 +26,7 @@ fn main() {
         if destFolder.exists() && destFolder.is_dir(){ // Check if destination folder exists and is a directory
             
             // println!("{} exists and is a directory", destFolders[i]);
-            println!("Enter a chracter to assign to folder: \n {}", destFolders[i]);
+            println!("\nEnter a chracter to assign to folder: \n{}", destFolders[i]);
             
             // Input only allows one character
             let mut charInput = String::new();
@@ -39,7 +39,7 @@ fn main() {
             // println!("{:?}", destDirs);
         }
         else {
-            println!("{} does not exist, skipping...", destFolders[i]);
+            println!("\n{} does not exist, skipping...", destFolders[i]);
         }
     }
 
@@ -55,7 +55,7 @@ fn main() {
 
     let source = loop {
         let mut option = String::new();
-        println!("Is your file/folder all located in the same directory? (y/n)");
+        println!("\nIs your file/folder all located in the same directory? (y/n)");
         io::stdin().read_line(&mut option).expect("Failed to read line");
         resultTuple = sourceFileInput(&mut option);
         if &resultTuple.0 != "" { // If input was valid, returns string of list of directories/files
@@ -91,28 +91,28 @@ fn main() {
             true => {
                 loop{
                     let mut option = String::new();
-                    println!("Move \n {} \n to", sourceContents[i].display());
+                    println!("\nMove \n'{}' \nto", sourceContents[i].display());
                     io::stdin().read_line(&mut option).expect("Failed to read line");
                     let mut result = moveContent(&sourceContents[i], &option, &destDirs, true);
                     // println!("{:?}", result);
                     if result == true {
                         break;
                     } else{
-                        println!("Folder assosiated with {} was not found", option)
+                        println!("\nFolder assosiated with {} was not found", option)
                     }
                 }
             }
             false => {
                 loop{
                     let mut option = String::new();
-                    println!("Move {} to: ", sourceContents[i].file_name().unwrap().to_str().unwrap());
+                    println!("\nMove '{}' to: ", sourceContents[i].file_name().unwrap().to_str().unwrap());
                     io::stdin().read_line(&mut option).expect("Failed to read line");
                     let mut result = moveContent(&sourceContents[i], &option, &destDirs, false);
                     // println!("{:?}", result);
                     if result == true {
                         break;
                     } else{
-                        println!("Folder assosiated with {} was not found", option)
+                        println!("\nFolder assosiated with {} was not found", option)
                     }
                 }
             }
@@ -131,17 +131,17 @@ fn sourceFileInput(option: &mut String) -> (String, bool){
     // println!("{}", option);
     match option.trim() {
         "y" => {
-            println!("Enter the directory where all files/folders are stored");
+            println!("\nEnter the directory where all files/folders are stored");
             io::stdin().read_line(&mut sourceDir).expect("Failed to read line");
             sourceOption = true;
         },
         "n" => {
-            println!("Enter files/folders to move (Separate by spaces)");
+            println!("\nEnter files/folders to move (Separate by spaces)");
             io::stdin().read_line(&mut sourceDir).expect("Failed to read line");
             sourceOption = false;
         },
         _ => {
-            println!("Invalid input, try again");
+            println!("\nInvalid input, try again");
         }
     }
     // println!("Source Dir (In Function): {}", sourceDir);
@@ -158,7 +158,7 @@ fn moveContent(source: &PathBuf, dest: &str, destDirs: &Vec<Vec<String>>, mode: 
     let mut stdout = stdout();
     let copyOptionsDir = fs_extra::dir::CopyOptions::new();
     let copyOptionsFile = fs_extra::file::CopyOptions{
-        buffer_size: 10000,
+        buffer_size: 100000,
         ..Default::default()
     };
 
