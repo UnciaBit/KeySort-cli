@@ -33,7 +33,7 @@ Drag and Drop destination folders (Separate each directory by space)
 ```
 > On macOS, this input can be done just by dragging and dropping select folders into the terminal window,
 however on Linux and Windows, that will append apostrophes (' ') at each end of the path. This could potentially cause problem with the program,
-therefore remove the apostrophes (') from the directory name if you are using Windows and Linux
+therefore remove the apostrophes (') from the path if you are using Windows and Linux
 
 3. **Assign keys/characters to the folders**
 
