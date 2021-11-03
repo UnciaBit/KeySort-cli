@@ -55,7 +55,7 @@ fn main() {
 
     let source = loop {
         let mut option = String::new();
-        println!("Is your file/foler all located in the same directory? (y/n)");
+        println!("Is your file/folder all located in the same directory? (y/n)");
         io::stdin().read_line(&mut option).expect("Failed to read line");
         resultTuple = sourceFileInput(&mut option);
         if &resultTuple.0 != "" { // If input was valid, returns string of list of directories/files
