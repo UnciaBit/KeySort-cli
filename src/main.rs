@@ -25,57 +25,53 @@ fn main() {
     let destFolders = destFolders.replace(" /", " //");
     let destFolders: Vec<&str> = destFolders.trim().split(" /").collect(); 
     //
-    
 
-    // Bug where it unintentially cuts strings where there is a space in folder name
-
-    // let n = destFolders[0];
-    // println!("First item: {}", n);
-    // println!("Number of inputs: {}", destFolders.len());
-
-    // println!("{:?}", destFolders);
-    let mut destDirs: Vec<Vec<String>> = Vec::new();
+    let mut destDirs: Vec<Vec<String>> = Vec::new(); // 2d Vector of destination directories
 
     for i in 0..destFolders.len() {
         let destFolder = Path::new(destFolders[i]);
-        //Check if the path exists
-        if destFolder.exists() && destFolder.is_dir(){
-            println!("{} exists and is a directory", destFolders[i]);
-            // 2d array of unknown size
+        if destFolder.exists() && destFolder.is_dir(){ // Check if destination folder exists and is a directory
+            
+            // println!("{} exists and is a directory", destFolders[i]);
             println!("Enter a chracter to assign to folder: \n {}", destFolders[i]);
+            
             // Input only allows one character
             let mut charInput = String::new();
             io::stdin().read_line(&mut charInput).expect("Failed to read line");
             let charInput: char = charInput.trim().chars().next().unwrap();
-            println!("charInput: {}", charInput);
-            // Add destFolder and charInput in 2d array
+            // println!("charInput: {}", charInput);
+
+            // Add destFolder and charInput in 2d Vector
             destDirs.push(vec![destFolders[i].to_string(), charInput.to_string()]);
-            println!("{:?}", destDirs);
+            // println!("{:?}", destDirs);
         }
         else {
             println!("{} does not exist, skipping...", destFolders[i]);
         }
     }
 
-    // let mut destDirs: Vec<Vec<String>> = Vec::new();
-    for i in 0..destDirs.len() {
-        println!("destDir {:?}", destDirs[i][1]); // [i][0] is the folder name, [i][1] is the character
-    }
+    // for i in 0..destDirs.len() {
+    //     println!("destDir {:?}", destDirs[i][1]); // [i][0] is the folder name, [i][1] is the character
+    // }
 
     // Receive files and folders to move from user
     let mut sourceFiles = String::new();
 
-    let mut sourceOption = true;
+    let mut inputResult = String::new();
+    let mut resultTuple = (String::new(), true); //If all files and folders are in the same directory, true if yes
 
     let source = loop {
         let mut option = String::new();
         println!("Is your file/foler all located in the same directory? (y/n)");
         io::stdin().read_line(&mut option).expect("Failed to read line");
-        let (inputResult, sourceOption) = sourceFileInput(&mut option);
-        if inputResult != "" {
-            break inputResult;
+        resultTuple = sourceFileInput(&mut option);
+        if &resultTuple.0 != "" { // If input was valid, returns string of list of directories/files
+            break &resultTuple.0;
         }
     };
+
+    // println!("Result Tuple 0 {}", &resultTuple.0);
+    println!("Result Tuple 1 {}", &resultTuple.1);
 
     // Put this in function later
     let source = source.replace("\\ ", " ");
@@ -84,20 +80,20 @@ fn main() {
     let mut source: Vec<&str> = source.trim().split(" /").collect(); 
     //
 
-    // println!("{:?}", source[0]);
     let mut sourceContents: Vec<PathBuf> = vec![];
-    if source.len() >= 1{ // If there are multiple files/folders
+    if source.len() > 1 || resultTuple.1 == false{ // If there are multiple files/folders
         for i in 0..source.len() {
             sourceContents.push(Path::new(source[i]).to_path_buf());
         }
-    } else if source.len() == 1 && sourceOption ==  true{ // If there is only one folder, read folder contents
-        println!("{:?}", source[0]);
+    } else if source.len() == 1 && resultTuple.1 == true{ 
+        // If there is only one folder and "All file/folders located in same directory" is true
+        // println!("{:?}", source[0])
         let sourceFolderContents = fs::read_dir(source[0]).expect("Failed to read directory");
         for file in sourceFolderContents {
             sourceContents.push(file.unwrap().path());
         }
     }
-    println!("{:?}", sourceContents);
+    // println!("{:?}", sourceContents);
 
     // Loop through sourceContents and move to destDirs
     for i in 0..sourceContents.len() {
@@ -108,7 +104,7 @@ fn main() {
                     println!("Move \n {} \n to", sourceContents[i].display());
                     io::stdin().read_line(&mut option).expect("Failed to read line");
                     let mut result = moveContent(&sourceContents[i], &option, &destDirs, true);
-                    println!("{:?}", result);
+                    // println!("{:?}", result);
                     if result == true {
                         break;
                     } else{
@@ -122,7 +118,7 @@ fn main() {
                     println!("Move {} to: ", sourceContents[i].file_name().unwrap().to_str().unwrap());
                     io::stdin().read_line(&mut option).expect("Failed to read line");
                     let mut result = moveContent(&sourceContents[i], &option, &destDirs, false);
-                    println!("{:?}", result);
+                    // println!("{:?}", result);
                     if result == true {
                         break;
                     } else{
@@ -138,11 +134,11 @@ fn main() {
 
 }
 
-// Function returns a string
+
 fn sourceFileInput(option: &mut String) -> (String, bool){
     let mut sourceDir = String::new();
     let mut sourceOption = true;
-    println!("{}", option);
+    // println!("{}", option);
     match option.trim() {
         "y" => {
             println!("Enter the directory where all files/folders are stored");
@@ -158,7 +154,7 @@ fn sourceFileInput(option: &mut String) -> (String, bool){
             println!("Invalid input, try again");
         }
     }
-    println!("Source Dir (In Function): {}", sourceDir);
+    // println!("Source Dir (In Function): {}", sourceDir);
     return (sourceDir.trim().to_string(),sourceOption);
 }
 
@@ -167,62 +163,68 @@ fn moveContent(source: &PathBuf, dest: &str, destDirs: &Vec<Vec<String>>, mode: 
     let source = source.to_path_buf();
     let mut iter = destDirs.iter();
     let dest = dest.trim();
-    let mut found = false;
+    let mut destFound = false;
     let mut destPath = PathBuf::new();
     let mut stdout = stdout();
     let copyOptionsDir = fs_extra::dir::CopyOptions::new();
-    let copyOptionsFile = fs_extra::file::CopyOptions::new();
-    println!("moveContent Function source: {:?}", source);
-    println!("moveContent Function dest: {:?}", dest);
+    let copyOptionsFile = fs_extra::file::CopyOptions{
+        buffer_size: 10000,
+        ..Default::default()
+    };
+
+    // println!("moveContent Function source: {:?}", source);
+    // println!("moveContent Function dest: {:?}", dest);
+
     // Find dest from 2d vector destDirs
     // Create new boolean varaible to store result of match
-    
     for i in 0..destDirs.len() {
         if destDirs[i][1].to_string() == dest{
-            println!("Equal: destDir: {}, dest: {}", destDirs[i][1], dest);
-            found = true;
+            // println!("Equal: destDir: {}, dest: {}", destDirs[i][1], dest);
+            destFound = true;
             destPath = Path::new(&destDirs[i][0]).to_path_buf();
             break;
         }
     }
 
-    println!("Found: {}", &found);    
+    // println!("Found: {}", &destFound);    
 
 
-    if found == true {
+    if destFound == true {
         match mode {
             true => {// If folder
                 let handleDir = |process_info: fs_extra::dir::TransitProcess| {
-                    stdout.queue(cursor::SavePosition).unwrap();
-                    stdout.write(format!("{} Bytes of {} Moved", process_info.copied_bytes, process_info.total_bytes).as_bytes()).unwrap();
-                    stdout.queue(cursor::RestorePosition).unwrap();
-                    stdout.flush().unwrap();
+                    // stdout.queue(cursor::SavePosition).unwrap();
+                    // stdout.write(format!("{} Bytes of {} Moved", process_info.copied_bytes, process_info.total_bytes).as_bytes()).unwrap();
+                    // stdout.queue(cursor::RestorePosition).unwrap();
+                    // stdout.flush().unwrap();
                     fs_extra::dir::TransitProcessResult::ContinueOrAbort
                 };
-                println!("Move Confirmation\n File/Folder to move: {}\n Destination: {}", source.display(), destPath.display());
+
+                // println!("Moving: {}\n to: {}", source.display(), destPath.display());
+
                 move_dir_with_progress(source, destPath, &copyOptionsDir, handleDir).expect("Failed to move file");
             },
             false => {// If file
                 let handleFile = |process_info: fs_extra::file::TransitProcess| {
-                    stdout.queue(cursor::SavePosition).unwrap();
-                    stdout.write(format!("{} Bytes of {} Moved", process_info.copied_bytes, &process_info.total_bytes).as_bytes()).unwrap();
-                    stdout.queue(cursor::RestorePosition).unwrap();
-                    stdout.flush().unwrap();
+                    // stdout.queue(cursor::SavePosition).unwrap();
+                    // stdout.write(format!("{} Bytes of {} Moved", process_info.copied_bytes, &process_info.total_bytes).as_bytes()).unwrap();
+                    // stdout.queue(cursor::RestorePosition).unwrap();
+                    // stdout.flush().unwrap();
                 };
-                println!("Move Confirmation\n File/Folder to move: {}\n Destination: {}", source.display(), destPath.display());
+
+                // println!("Moving: {}\n to: {}", source.display(), destPath.display());
+
                 // If the character at the end of destPath is not /, add it
                 if destPath.to_str().unwrap().chars().last().unwrap() != '/' {
                     destPath.join("/");
                 }
                 // Add souce filename at the end of destPath
                 let mut destPath = destPath.join(source.file_name().unwrap());
-                println!("{:?}", destPath);
+                // println!("{:?}", destPath);
                 move_file_with_progress(source, destPath, &copyOptionsFile, handleFile).expect("Failed to move file");
             },
         }
         
     }
-
-    return found;
-    // fs::rename(source, dest).expect("Failed to move file");
+    return destFound;
 }
