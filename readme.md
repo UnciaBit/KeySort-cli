@@ -48,7 +48,6 @@ Enter a character to assign to folder:
 <character>
 
 //Example
-
 Enter a character to assign to folder:
 /Users/john/Desktop
 a //Type 'a' and hit Enter
