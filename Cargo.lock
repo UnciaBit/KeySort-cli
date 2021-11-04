@@ -56,7 +56,7 @@ dependencies = [
 
 [[package]]
 name = "keysort"
-version = "0.1.0-alpha.2B"
+version = "0.1.0-alpha.2C"
 dependencies = [
  "crossterm",
  "fs_extra",
